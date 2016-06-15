@@ -2,6 +2,10 @@ body {
     margin: 0px !important;
 }
 
+.caret {
+    border-top: 4px solid;
+}
+
 .emph {
   font-weight: bold;
 }
@@ -82,14 +86,6 @@ input[type="checkbox"] {
 form div {
   padding-top: 1px;
 }
-.navbar-brand a {
-  color: white;
-  text-decoration: none;
-}
-.navbar-brand a:hover {
-  color: white;
-  text-decoration: none;
-}
 
 .header span {
     margin-left: 5px;
@@ -135,10 +131,10 @@ span.title-block {
 .nvtooltip table td{
     font-size: 11px !important;
 }
-.navbar {
-  -webkit-box-shadow: 0px 3px 3px #AAA;
-  -moz-box-shadow: 0px 3px 3px #AAA;
-  box-shadow: 0px 3px 3px #AAA;
+div.navbar {
+  -webkit-box-shadow: 0px 2px 2px #CCC;
+  -moz-box-shadow: 0px 2px 2px #CCC;
+  box-shadow: 0px 2px 2px #ccc;
   z-index: 999;
 }
 .panel.panel-primary {
@@ -174,12 +170,12 @@ li.widget:hover {
   z-index: 1000;
 }
 
-li.widget .chart-header {
+div.widget .chart-header {
   padding: 5px;
   background-color: #f1f1f1;
 }
 
-li.widget .chart-header a {
+div.widget .chart-header a {
   margin-left: 5px;
 }
 
@@ -187,16 +183,18 @@ li.widget .chart-header a {
   display: none;
 }
 
-li.widget .chart-controls {
+div.widget .chart-controls {
+  background-clip: content-box;
   background-color: #f1f1f1;
   position: absolute;
   right: 0;
   left: 0;
-  padding: 0px 5px;
+  top: 5px;
+  padding: 5px 5px;
   opacity: 0.75;
   display: none;
 }
 
-li.widget .slice_container {
+div.widget .slice_container {
   overflow: auto;
 }
