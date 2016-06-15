@@ -72,11 +72,9 @@ function treemap(slice) {
     // We also take a snapshot of the original children (_children) to avoid
     // the children being overwritten when when layout is computed.
     var accumulate = function (d) {
-      d._children = d.children;
-      if (d._children) {
-        d.value = d.children.reduce(function (p, v) { return p + accumulate(v); }, 0);
-      }
-      return d.value;
+      return (d._children = d.children)
+          ? d.value = d.children.reduce(function (p, v) { return p + accumulate(v); }, 0)
+          : d.value;
     };
 
     // Compute the treemap layout recursively such that each group of siblings

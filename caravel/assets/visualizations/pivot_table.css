@@ -1,4 +1,4 @@
-.slice-grid .widget.pivot_table .slice_container {
+.gridster .widget.pivot_table .slice_container {
     overflow: auto !important;
 }
 

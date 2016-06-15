@@ -1,14 +1,15 @@
 
+{% macro locale_menu(languages) %}
 {% set locale = session['locale'] %}
 {% if not locale %}
     {% set locale = 'en' %}
 {% endif %}
-{% if languages.keys()|length > 1 %}
 <li class="dropdown">
     <a class="dropdown-toggle" data-toggle="dropdown" href="javascript:void(0)">
        <div class="f16"><i class="flag {{languages[locale].get('flag')}}"></i><b class="caret"></b>
        </div>
     </a>
+    {% if languages.keys()|length > 1 %}
     <ul class="dropdown-menu">
     <li class="dropdown">
         {% for lang in languages %}
@@ -20,8 +21,9 @@
             {% endfor %}
         </li>
         </ul>
+    {% endif %}
 </li>
-{% endif %}
+{% endmacro %}
 
 
 

@@ -4,22 +4,23 @@
 .dashboard i.drag {
   cursor: move !important;
 }
-.dashboard .slice-grid .preview-holder {
+.dashboard .gridster .preview-holder {
   z-index: 1;
   position: absolute;
   background-color: #AAA;
   border-color: #AAA;
   opacity: 0.3;
 }
-
-.slice-grid div.widget{
+.gridster li.widget{
+  list-style-type: none;
   border-radius: 0;
+  margin: 5px;
   border: 1px solid #ccc;
   box-shadow: 2px 1px 5px -2px #aaa;
   background-color: #fff;
 }
-.dashboard .slice-grid .dragging,
-.dashboard .slice-grid .resizing {
+.dashboard .gridster .dragging,
+.dashboard .gridster .resizing {
   opacity: 0.5;
 }
 .dashboard img.loading {
