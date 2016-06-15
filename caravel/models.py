@@ -853,7 +853,7 @@ class SqlaTable(Model, Queryable, AuditMixinNullable):
             db.session.commit()
 
         metrics.append(M(
-            metric_name='count',
+            metric_name='_count',
             verbose_name='COUNT(*)',
             metric_type='count',
             expression="COUNT(*)"
@@ -1403,10 +1403,10 @@ class DruidColumn(Model, AuditMixinNullable):
         M = DruidMetric  # noqa
         metrics = []
         metrics.append(DruidMetric(
-            metric_name='count',
+            metric_name='_count',
             verbose_name='COUNT(*)',
             metric_type='count',
-            json=json.dumps({'type': 'count', 'name': 'count'})
+            json=json.dumps({'type': 'count', 'name': '_count'})
         ))
         # Somehow we need to reassign this for UDAFs
         if self.type in ('DOUBLE', 'FLOAT'):
