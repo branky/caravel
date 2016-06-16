@@ -216,7 +216,9 @@ def json_iso_dttm_ser(obj):
     """
     if isinstance(obj, datetime):
         obj = obj.isoformat()
-    return obj
+        return obj
+    else:
+        return str(obj)
 
 
 def markdown(s, markup_wrap=False):
