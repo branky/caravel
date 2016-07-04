@@ -190,7 +190,7 @@ function horizonViz(slice) {
     d3.json(slice.jsonEndpoint(), function (error, payload) {
       var fd = payload.form_data;
       if (error) {
-        slice.error(error.responseText);
+        slice.error(error.responseText, error);
         return '';
       }
 
@@ -225,7 +225,7 @@ function horizonViz(slice) {
         .call(this, d.values, i);
       });
 
-      slice.done();
+      slice.done(payload);
     });
   }
   return {

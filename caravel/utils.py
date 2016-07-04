@@ -4,20 +4,22 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from datetime import datetime
+import decimal
 import functools
 import json
 import logging
 import numpy
-from datetime import datetime
+import time
 
 import parsedatetime
 import sqlalchemy as sa
 from dateutil.parser import parse
-from alembic import op
 from flask import flash, Markup
 from flask_appbuilder.security.sqla import models as ab_models
 from markdown import markdown as md
 from sqlalchemy.types import TypeDecorator, TEXT
+from pydruid.utils.having import Having
 
 
 class CaravelException(Exception):
@@ -26,6 +28,19 @@ class CaravelException(Exception):
 
 class CaravelSecurityException(CaravelException):
     pass
+
+
+class MetricPermException(Exception):
+    pass
+
+
+def can_access(security_manager, permission_name, view_name):
+    """Protecting from has_access failing from missing perms/view"""
+    try:
+        return security_manager.has_access(permission_name, view_name)
+    except:
+        pass
+    return False
 
 
 def flasher(msg, severity=None):
@@ -70,6 +85,18 @@ class memoized(object):  # noqa
     def __get__(self, obj, objtype):
         """Support instance methods."""
         return functools.partial(self.__call__, obj)
+
+
+class DimSelector(Having):
+    def __init__(self, **args):
+        # Just a hack to prevent any exceptions
+        Having.__init__(self, type='equalTo', aggregation=None, value=None)
+
+        self.having = {'having': {
+            'type': 'dimSelector',
+            'dimension': args['dimension'],
+            'value': args['value'],
+        }}
 
 
 def list_minus(l, minus):
@@ -183,21 +210,22 @@ def init(caravel):
     public_role_like_gamma = \
         public_role and config.get('PUBLIC_ROLE_LIKE_GAMMA', False)
     for perm in perms:
-        if (perm.view_menu and perm.view_menu.name not in (
-                'ResetPasswordView',
-                'RoleModelView',
-                'UserDBModelView',
-                'Security') and
-            perm.permission.name not in (
-                'all_datasource_access',
-                'can_add',
-                'can_download',
-                'can_delete',
-                'can_edit',
-                'can_save',
-                'datasource_access',
-                'muldelete',
-            )):
+        if (
+                perm.view_menu and perm.view_menu.name not in (
+                    'ResetPasswordView',
+                    'RoleModelView',
+                    'UserDBModelView',
+                    'Security') and
+                perm.permission.name not in (
+                    'all_datasource_access',
+                    'can_add',
+                    'can_download',
+                    'can_delete',
+                    'can_edit',
+                    'can_save',
+                    'datasource_access',
+                    'muldelete',
+                )):
             sm.add_permission_role(gamma, perm)
             if public_role_like_gamma:
                 sm.add_permission_role(public_role, perm)
@@ -208,6 +236,29 @@ def init(caravel):
         table.perm for table in session.query(models.DruidDatasource).all()]
     for table_perm in table_perms:
         merge_perm(sm, 'datasource_access', table_perm)
+
+    init_metrics_perm(caravel)
+
+
+def init_metrics_perm(caravel, metrics=None):
+    """Create permissions for restricted metrics
+
+    :param metrics: a list of metrics to be processed, if not specified,
+        all metrics are processed
+    :type metrics: models.SqlMetric or models.DruidMetric
+    """
+    db = caravel.db
+    models = caravel.models
+    sm = caravel.appbuilder.sm
+
+    if not metrics:
+        metrics = []
+        for model in [models.SqlMetric, models.DruidMetric]:
+            metrics += list(db.session.query(model).all())
+
+    for metric in metrics:
+        if metric.is_restricted and metric.perm:
+            merge_perm(sm, 'metric_access', metric.perm)
 
 
 def datetime_f(dttm):
@@ -222,6 +273,16 @@ def datetime_f(dttm):
     return "<nobr>{}</nobr>".format(dttm)
 
 
+def base_json_conv(obj):
+
+    if isinstance(obj, numpy.int64):
+        return int(obj)
+    elif isinstance(obj, set):
+        return list(obj)
+    elif isinstance(obj, decimal.Decimal):
+        return float(obj)
+
+
 def json_iso_dttm_ser(obj):
     """
     json serializer that deals with dates
@@ -230,10 +291,25 @@ def json_iso_dttm_ser(obj):
     >>> json.dumps({'dttm': dttm}, default=json_iso_dttm_ser)
     '{"dttm": "1970-01-01T00:00:00"}'
     """
+    val = base_json_conv(obj)
+    if val is not None:
+        return val
     if isinstance(obj, datetime):
         obj = obj.isoformat()
-    elif isinstance(obj, numpy.int64):
-        obj = int(obj)
+    else:
+        raise TypeError(
+             "Unserializable object {} of type {}".format(obj, type(obj))
+        )
+    return obj
+
+
+def json_int_dttm_ser(obj):
+    """json serializer that deals with dates"""
+    val = base_json_conv(obj)
+    if val is not None:
+        return val
+    if isinstance(obj, datetime):
+        obj = int(time.mktime(obj.timetuple())) * 1000
     else:
         raise TypeError(
              "Unserializable object {} of type {}".format(obj, type(obj))
@@ -259,16 +335,12 @@ def readfile(filepath):
     return content
 
 
-def generic_find_constraint_name(table, columns, referenced):
-    """
-    Utility to find a constraint name in alembic migrations
-    """
-    engine = op.get_bind().engine
-    m = sa.MetaData({})
-    t = sa.Table(table, m, autoload=True, autoload_with=engine)
+def generic_find_constraint_name(table, columns, referenced, db):
+    """Utility to find a constraint name in alembic migrations"""
+    t = sa.Table(table, db.metadata, autoload=True, autoload_with=db.engine)
 
     for fk in t.foreign_key_constraints:
-        if fk.referred_table.name == referenced and \
-            set(fk.column_keys) == columns:
+        if (
+                fk.referred_table.name == referenced and
+                set(fk.column_keys) == columns):
             return fk.name
-    return None

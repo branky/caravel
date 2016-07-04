@@ -1,5 +1,7 @@
 var $ = window.$ || require('jquery');
 
+require('./markup.css');
+
 function markupWidget(slice) {
 
   function refresh() {
@@ -7,10 +9,10 @@ function markupWidget(slice) {
 
     $.getJSON(slice.jsonEndpoint(), function (payload) {
         slice.container.html(payload.data.html);
-        slice.done();
+        slice.done(payload);
       })
       .fail(function (xhr) {
-        slice.error(xhr.responseText);
+        slice.error(xhr.responseText, xhr);
       });
   }
 

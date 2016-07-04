@@ -1,7 +1,7 @@
 """The main config file for Caravel
 
-All configuration in this file can be overridden by providing a local_config
-in your PYTHONPATH as there is a ``from local_config import *``
+All configuration in this file can be overridden by providing a caravel_config
+in your PYTHONPATH as there is a ``from caravel_config import *``
 at the end of this file.
 """
 from __future__ import absolute_import
@@ -18,10 +18,10 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 # ---------------------------------------------------------
-# Caravel specifix config
+# Caravel specific config
 # ---------------------------------------------------------
 ROW_LIMIT = 50000
-WEBSERVER_THREADS = 8
+CARAVEL_WORKERS = 16
 
 CARAVEL_WEBSERVER_PORT = 8088
 CARAVEL_WEBSERVER_TIMEOUT = 60
@@ -53,7 +53,7 @@ SHOW_STACKTRACE = True
 APP_NAME = "Caravel"
 
 # Uncomment to setup Setup an App icon
-# APP_ICON = "/static/img/something.png"
+APP_ICON = "/static/assets/images/caravel_logo.png"
 
 # Druid query timezone
 # tz.tzutc() : Using utc timezone
@@ -173,6 +173,9 @@ ROLLOVER = 'midnight'
 INTERVAL = 1
 BACKUP_COUNT = 30
 
+# Set this API key to enable Mapbox visualizations
+MAPBOX_API_KEY = ""
+
 
 try:
     from caravel_config import *  # noqa
@@ -181,4 +184,3 @@ except ImportError:
 
 if not CACHE_DEFAULT_TIMEOUT:
     CACHE_DEFAULT_TIMEOUT = CACHE_CONFIG.get('CACHE_DEFAULT_TIMEOUT')
-

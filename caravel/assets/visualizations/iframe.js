@@ -10,10 +10,10 @@ function iframeWidget(slice) {
         var iframe = slice.container.find('iframe');
         iframe.css('height', slice.height());
         iframe.attr('src', url);
-        slice.done();
+        slice.done(payload);
       })
       .fail(function (xhr) {
-        slice.error(xhr.responseText);
+        slice.error(xhr.responseText, xhr);
       });
   }
 
