@@ -6,8 +6,8 @@ var config = {
   // for now generate one compiled js file per entry point / html page
   entry: {
     'css-theme': APP_DIR + '/javascripts/css-theme.js',
-    dashboard: APP_DIR + '/javascripts/dashboard.jsx',
-    explore: APP_DIR + '/javascripts/explore.js',
+    dashboard: APP_DIR + '/javascripts/dashboard/Dashboard.jsx',
+    explore: APP_DIR + '/javascripts/explore/explore.jsx',
     welcome: APP_DIR + '/javascripts/welcome.js',
     sql: APP_DIR + '/javascripts/sql.js',
     standalone: APP_DIR + '/javascripts/standalone.js',
@@ -15,7 +15,7 @@ var config = {
   },
   output: {
     path: BUILD_DIR,
-    filename: '[name].entry.js'
+    filename: '[name].entry.jsx'
   },
   resolve: {
     alias: {
